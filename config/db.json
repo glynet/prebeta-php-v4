@@ -1,0 +1,7 @@
+{
+    "host": "db",
+    "port": 8000,
+    "username": "root",
+    "password": "test",
+    "dbname": "glynet"
+}

@@ -1,0 +1,55 @@
+.left {
+    border-radius: 18px;
+    background-color: var(--secondary-color);
+    height: calc(100vh - calc(18px * 2));
+    padding: 12px;
+
+    .menu {
+        height: calc(100vh - 36px);
+        overflow-y: auto;
+        margin-top: -12px;
+        padding: 12px 0;
+
+        .selected {
+            background-color: var(--app-color-trans) !important;
+
+            .item {
+                background: linear-gradient(45deg, var(--app-color), var(--app-color-x1)) !important;
+
+                svg {
+                    fill: #fff !important;
+                }
+            }
+        }
+
+        .menu-item {
+            padding: 7px;
+            border-radius: 100%;
+            cursor: pointer;
+            transition: .1s;
+
+            .item {
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 100%;
+                background: var(--menu-item);
+
+                svg {
+                    height: 25px;
+                    fill: var(--menu-item-icon-color);
+                }
+            }
+
+            &:hover {
+                background: var(--menu-item-hover);
+            }
+
+            &:active {
+                transform: scale(0.9);
+            }
+        }
+    }
+}

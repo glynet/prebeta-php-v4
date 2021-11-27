@@ -1,0 +1,17 @@
+RewriteEngine On
+
+RewriteRule ^view_image.php$ transporter.php [L]
+RewriteRule ^img/avatar.png$ app/assets/images/avatar.png [L]
+RewriteRule ^static/build/script/(.*)$ app/build/scripts/$1  [L]
+RewriteRule ^static/build/style/(.*)$ app/build/stylesheets/$1 [L]
+RewriteRule ^static/assets/(.*)$ app/assets/$1 [L]
+
+RewriteRule ^transporter.php - [L]
+RewriteRule ^cdn/ - [L]
+RewriteRule ^config/ - [L]
+RewriteRule ^app/assets/ - [L]
+RewriteRule ^app/views/ - [L]
+RewriteRule ^app/source/ - [L]
+RewriteRule ^app/build/ - [L]
+
+RewriteRule (.*) index.php

@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "lib": ["ES2015", "DOM", "ES2015.Promise", "ES2016", "ES2016.Array.Include", "ES2017", "ES2018", "ES2019", "ES6"],
+        "outFile": "./app/build/scripts/dist.js",
+        "esModuleInterop": true,
+        "removeComments": true,
+        "sourceMap": true
+    },
+    "files": [
+        "./app/source/scripts/utils.ts",
+        "./app/source/scripts/classes/Application.ts",
+        "./app/source/scripts/classes/Client.ts",
+        "./app/source/scripts/classes/Stories.ts",
+        "./app/source/scripts/classes/Posts.ts",
+        "./app/source/scripts/classes/Profile.ts",
+        "./app/source/scripts/app.ts"
+    ],
+    "strict": true
+}

@@ -1,0 +1,56 @@
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+body {
+    @include font('15px', 'Gilroy-Medium');
+    background-color: var(--bg);
+    overflow: hidden;
+    color: var(--grey);
+
+    .app {
+        display: flex;
+        padding: 15px;
+        grid-gap: 15px;
+
+        @import "left";
+
+        .center {
+            width: calc(100% - calc(var(--desktop-right-menu-width) + 112px));
+
+            .content {
+                @import "header";
+
+                main {
+                    --main-width: 1250px;
+
+                    max-width: 1250px;
+                    width: 100%;
+                    margin: 15px auto;
+                    position: relative;
+                    overflow-y: auto;
+                    height: calc(100vh - 108px);
+                    border-radius: 20px;
+
+                    &::-webkit-scrollbar {
+                        width: 0;
+                        height: 0;
+                    }
+
+                    @import "../components/posts";
+
+                    @import "../pages/profile";
+
+                    @import "../pages/feed";
+
+                    @import "../pages/explore";
+                }
+            }
+        }
+
+        @import "right";
+
+        @import "../components/others";
+
+        @import "../components/modals";
+    }
+}

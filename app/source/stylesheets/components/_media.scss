@@ -1,0 +1,12 @@
+@media only screen and (max-width: 1200px) {
+    body .app .center .content main .post-area .post-listing-area {
+        columns: 1 !important;
+    }
+}
+
+@media (prefers-reduced-motion) {
+    * {
+        animation: none !important;
+        transform: none !important;
+    }
+}
