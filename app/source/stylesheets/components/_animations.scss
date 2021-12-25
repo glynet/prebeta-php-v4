@@ -117,3 +117,15 @@
         left: -5px;
     }
 }
+
+@include keyframes(gra-icon) {
+    0% { opacity: .5; }
+    50% { opacity: 1 }
+    100% { opacity: .5 }
+}
+
+@include keyframes(gra) {
+    0% { left: -200%; top: -200%; }
+    50% { left: 0%; top: 0%; }
+    100% { left: -200%; top: -200%; }
+}

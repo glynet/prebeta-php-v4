@@ -133,7 +133,7 @@ class Notifications {
                         'name' => $from->name,
                         'username' => $from->username,
                         'avatar' => $from->avatar,
-                        'isVerified' => (bool)$from->isVerified
+                        'isVerified' => (bool)$from->is_verified
                     ],
                     'details' => [
                         'type' => $row->type,

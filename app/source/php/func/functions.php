@@ -203,3 +203,141 @@ function randomName(): string
 
     return $name;
 }
+
+function randomSeed($length = 16): string
+{
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+
+    for ($i = 0; $i < $length; $i++) {
+        $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+
+    return $randomString;
+}
+
+
+function slashes($str, $encode = true): string
+{
+    if ($encode) {
+        return str_replace("'", "{/quotes}", $str);
+    } else {
+        return str_replace("{/quotes}", "'", $str);
+    }
+}
+
+function passwordEncrypt($password): string
+{
+    $password = md5($password);
+    $password = crc32($password);
+    $password = sha1($password);
+    $password = md5($password);
+    $password = crc32($password);
+    $password = sha1($password);
+
+    return $password;
+}
+
+function getBrowser(): string
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+    $browser = "Unknown";
+    $browser_array  = array(
+        '/msie/i'       =>  'Internet Explorer',
+        '/firefox/i'    =>  'Firefox',
+        '/safari/i'     =>  'Safari',
+        '/chrome/i'     =>  'Chrome',
+        '/edge/i'       =>  'Edge',
+        '/opera/i'      =>  'Opera',
+        '/netscape/i'   =>  'Netscape',
+        '/maxthon/i'    =>  'Maxthon',
+        '/konqueror/i'  =>  'Konqueror',
+        '/mobile/i'     =>  'Handheld Browser'
+    );
+
+    foreach ($browser_array as $regex => $value) {
+        if (preg_match( $regex, $user_agent )) {
+            $browser = $value;
+        }
+    }
+
+    return $browser;
+}
+
+function getOS(): string
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+    $os_platform = "Unknown";
+    $os_array = array(
+        '/windows nt 11/i'      => 'Windows 11',
+        '/windows nt 10/i'      => 'Windows 10',
+        '/windows nt 6.3/i'     => 'Windows 8.1',
+        '/windows nt 6.2/i'     => 'Windows 8',
+        '/windows nt 6.1/i'     => 'Windows 7',
+        '/windows nt 6.0/i'     => 'Windows Vista',
+        '/windows nt 5.2/i'     => 'Windows Server 2003/XP x64',
+        '/windows nt 5.1/i'     => 'Windows XP',
+        '/windows xp/i'         => 'Windows XP',
+        '/windows nt 5.0/i'     => 'Windows 2000',
+        '/windows me/i'         => 'Windows ME',
+        '/win98/i'              => 'Windows 98',
+        '/win95/i'              => 'Windows 95',
+        '/win16/i'              => 'Windows 3.11',
+        '/CrOS armv7/i'         => 'Chrome OS',
+        '/macintosh|mac os x/i' => 'Mac',
+        '/mac_powerpc/i'        => 'Mac',
+        '/linux/i'              => 'Linux',
+        '/ubuntu/i'             => 'Ubuntu',
+        '/iphone/i'             => 'iPhone',
+        '/ipod/i'               => 'iPod',
+        '/ipad/i'               => 'iPad',
+        '/android/i'            => 'Android',
+        '/blackberry/i'         => 'BlackBerry',
+        '/webos/i'              => 'Mobile'
+    );
+    foreach ($os_array as $regex => $value) {
+        if (preg_match($regex, $user_agent)) {
+            $os_platform = $value;
+        }
+    }
+
+    return $os_platform;
+}
+
+function crypto_rand_secure($min, $max)
+{
+    $range = $max - $min;
+
+    if ($range < 1)
+        return $min;
+
+    $log = ceil(log($range, 2));
+    $bytes = (int) ($log / 8) + 1;
+    $bits = (int) $log + 1;
+    $filter = (1 << $bits) - 1;
+
+    do {
+        $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes)));
+        $rnd = $rnd & $filter;
+    } while ($rnd > $range);
+
+    return $min + $rnd;
+}
+
+function tokenGenerator($length = 64): string
+{
+    $token = "";
+    $codeAlphabet = "0123456789";
+    $codeAlphabet.= "0123456789";
+    $codeAlphabet.= "0123456789";
+    $max = strlen($codeAlphabet);
+
+    for ($i=0; $i < $length; $i++) {
+        $token .= $codeAlphabet[crypto_rand_secure(0, $max-1)];
+    }
+
+    return $token;
+}

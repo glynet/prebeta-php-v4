@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 String.prototype.uiRepair = function () {
     return this.toString().replace(/\\/g, "").split("{/quotes}").join("'");
 };
@@ -22,12 +31,48 @@ let activeModalClassList = '';
 let activeDropdownClassList = '';
 let activePostMenuClassList = false;
 let searchSuggestionsSelectedItem = 0;
+let settingsTab = 0;
 const ui = {
+    syncUsernameToAvailable: (string) => {
+        const res = /^[a-zA-Z0-9_.]+$/.exec(string);
+        return !!res;
+    },
     addDots: (string, limit) => {
         let dots = "...";
         if (string.length > limit)
             string = string.substring(0, limit) + dots;
         return string;
+    },
+    reducedMotionMode: (open = true) => {
+        let body = $('body');
+        body.classList.remove('reduced-motion-mode');
+        if (open)
+            body.classList.add('reduced-motion-mode');
+    },
+    changeLineHeight: (value = 7) => {
+        let default_value = 7;
+        let default_line_height = 24;
+        doc.cookies.set('rwRlh', `${value}`, 300);
+        if ((value - default_value) < 0) {
+            $('body').style.lineHeight = `${default_line_height - Math.abs(value - default_value)}px`;
+        }
+        else {
+            $('body').style.lineHeight = `${default_line_height + Math.abs(value - default_value)}px`;
+        }
+    },
+    changeFontSize: (value = 9) => {
+        let default_value = 9;
+        doc.cookies.set('rwRfs', value.toString(), 300);
+        if ((value - default_value) < 0) {
+            for (let i = 10; i < 40; i++) {
+                document.documentElement.style.setProperty(`--font-size-${i}px`, `${i - Math.abs(value - default_value)}px`);
+            }
+        }
+        else {
+            for (let i = 10; i < 40; i++) {
+                document.documentElement.style.setProperty(`--font-size-${i}px`, `${i + Math.abs(value - default_value)}px`);
+            }
+        }
     },
     color: {
         changeBrightness: (color, percent) => {
@@ -189,6 +234,63 @@ const ui = {
                     app.clickListener();
                 }
             }
+        },
+        settings: {
+            updateChanges: () => {
+                let inputs = $$(`.settings-${settingsTab}`);
+                inputs.forEach((item) => {
+                    if (item.type == 'checkbox' || item.type == 'radio') {
+                        item.setAttribute('data-default-value', String(item.checked));
+                    }
+                    else {
+                        item.setAttribute('data-default-value', item.value);
+                    }
+                });
+            },
+            changesControl: (restore = false) => {
+                let inputs = $$(`.settings-${settingsTab}`);
+                let changed = 0;
+                for (let i = 0; i < inputs.length; i++) {
+                    let input = inputs[i];
+                    let value = input.type == 'checkbox' || input.type == 'radio' ? input.checked.toString() : input.value;
+                    if (value !== input.getAttribute('data-default-value')) {
+                        if (restore) {
+                            if (input.type == 'checkbox') {
+                                input.checked = (input.getAttribute('data-default-value') == 'true');
+                            }
+                            else if (input.type == 'radio') {
+                                input.checked = (input.getAttribute('data-default-value') == 'true');
+                            }
+                            else {
+                                input.value = input.getAttribute('data-default-value');
+                            }
+                        }
+                        else {
+                            changed++;
+                        }
+                    }
+                }
+                if (changed == 0) {
+                    return ui.desktop.settings.saveChanges(false);
+                }
+                else {
+                    return ui.desktop.settings.saveChanges(true);
+                }
+            },
+            saveChanges: (show = true) => {
+                let container = $('.save-changes-container');
+                let dynamic_content = $('.settings-dynamic');
+                if (show) {
+                    dynamic_content.style.paddingBottom = '90px';
+                    container.style.display = 'flex';
+                    setTimeout(() => container.style.opacity = '1', 100);
+                }
+                else {
+                    dynamic_content.style.paddingBottom = 'var(--settings-content-padding)';
+                    container.style.opacity = '0';
+                    setTimeout(() => container.style.display = 'none', 100);
+                }
+            }
         }
     }
 };
@@ -214,6 +316,14 @@ const doc = {
 const $ = (name) => window.document.querySelector(name);
 const $$ = (name) => window.document.querySelectorAll(name);
 const $$$ = (name, callback) => $(name).onclick = callback;
+const _file = ({ url, file }) => __awaiter(this, void 0, void 0, function* () {
+    let formData = new FormData();
+    formData.append("file", file);
+    yield fetch(url, {
+        method: "POST",
+        body: formData
+    }).then(r => r);
+});
 const _ = ({ url, method = "GET", data = {} }, callback = null) => {
     const request = new XMLHttpRequest();
     const urlParams = Object.keys(data)
@@ -286,12 +396,24 @@ var Glynet;
             });
         }
         clickListener() {
-            $$("div, span, img").forEach((elem) => {
+            $$("div, span, img, button, label").forEach((elem) => {
                 let click = elem.getAttribute("@click");
                 if ((click === null || click === void 0 ? void 0 : click.length) > 0 || click !== null) {
                     const classname = `.${[].slice.apply(elem.classList).join('.')}`;
                     $$$(classname, () => eval(click));
                     $(classname).removeAttribute("@click");
+                }
+            });
+            $$("input, textarea").forEach((elem) => {
+                const classname = `.${[].slice.apply(elem.classList).join('.')}`;
+                let max_length = elem.getAttribute("@max_length");
+                if ((max_length === null || max_length === void 0 ? void 0 : max_length.length) > 0 || max_length !== null) {
+                    $(classname).removeAttribute("@max_length");
+                    $(classname).addEventListener('keyup', function () {
+                        if (elem.value.length >= Number(max_length)) {
+                            elem.value = elem.value.slice(0, Number(max_length));
+                        }
+                    });
                 }
             });
         }
@@ -304,6 +426,9 @@ var Glynet;
                 case 1:
                     alert = 'Gönderi bağlantısı panoya kopyalandı';
                     break;
+                case 3:
+                    alert = 'Bağlantı panoya kopyalandı!';
+                    break;
             }
             let inp = $('.clipboard label input');
             inp.value = text;
@@ -311,6 +436,216 @@ var Glynet;
             inp.select();
             document.execCommand('copy');
             this.bottomAlert(alert);
+        }
+        settings(category = 1, tab = 1, group = 1, title) {
+            let title_area = $('.title-bar');
+            let title_groups = $$('.title-bar label');
+            let title_length = title_groups.length;
+            let menu_items = $$('.settings-menu .menu-group .group-item');
+            let contents = $$('.settings-details-container');
+            let settings = $('.settings-content');
+            let settings_dynamic = $('.settings-dynamic');
+            settingsTab = category;
+            function newTitleGroup(title) {
+                let node = document.createElement("label");
+                node.innerHTML = `
+                    <div @click="app.settings(${category}, ${tab}, ${group});" data-c="${category}" data-t="${tab}" class="title-group title-tab-${tab} title-group-${group} title-group-id-${Math.floor(Math.random() * 9999)}">
+                        <div class="text">
+                            <span>${title}</span>
+                        </div>
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="chevron-right"><rect width="24" height="24" transform="rotate(-90 12 12)" opacity="0"/><path d="M10.5 17a1 1 0 0 1-.71-.29 1 1 0 0 1 0-1.42L13.1 12 9.92 8.69a1 1 0 0 1 0-1.41 1 1 0 0 1 1.42 0l3.86 4a1 1 0 0 1 0 1.4l-4 4a1 1 0 0 1-.7.32z"/></g></g></svg>
+                        </div>
+                    </div>
+                `;
+                title_area.appendChild(node);
+            }
+            menu_items.forEach(m => m.removeAttribute('selected'));
+            menu_items[(category - 1)].setAttribute('selected', 'true');
+            contents.forEach(c => c.style.display = 'none');
+            contents.forEach(c => {
+                if (c.getAttribute('data-category') == category.toString() && c.getAttribute('data-tab') == tab.toString() && c.getAttribute('data-group') == group.toString())
+                    c.style.display = 'block';
+            });
+            if (title_area.innerText.length == 0)
+                _({
+                    url: 'pages/settings',
+                    method: 'GET'
+                }, (r) => {
+                    settings_dynamic.innerHTML = r['response'];
+                    let range_font_size = $('.range-slider-font-size');
+                    let range_line_height = $('.range-slider-line-height');
+                    let username_input = $('.settings-key-2-username.settings-inputs');
+                    let name_input = $('.settings-key-2-name.settings-inputs');
+                    let reduced_motion_mode_slider = $('.settings-reduced-motion-mode-slider');
+                    let ding_dong_slider = $('.settings-ding-dong-notifications-slider');
+                    let browser_notifications_slider = $('.settings-browser-notifications-slider');
+                    let profile_avatar_input = $('.profile-avatar-change-input');
+                    let profile_banner_input = $('.profile-banner-change-input');
+                    let inputs = $$('.settings-inputs');
+                    profile.getBlockedUsers();
+                    inputs.forEach((i) => {
+                        i.addEventListener(i.type == 'checkbox' ? 'change' : i.type == 'radio' ? 'click' : 'keyup', () => {
+                            ui.desktop.settings.changesControl();
+                        });
+                    });
+                    profile_banner_input.addEventListener('change', function () {
+                        if (this.files && this.files[0]) {
+                            let file = this.files[0];
+                            let previews = {
+                                color: $('.change-banner-container .banner .banner-content'),
+                                image: $('.change-banner-container .banner img'),
+                                video: $('.change-banner-container .banner video'),
+                                miniProfile: {
+                                    color: $('.edit-profile-mini-profile-banner-area .banner-content'),
+                                    image: $('.edit-profile-mini-profile-banner-area img'),
+                                    video: $('.edit-profile-mini-profile-banner-area video'),
+                                }
+                            };
+                            if (file.size < 33554432) {
+                                let reader = new FileReader();
+                                reader.readAsDataURL(file);
+                                reader.addEventListener("load", function (e) {
+                                    let file_type = file.type.split('/');
+                                    let accept_types = ['jpg', 'png', 'jpeg', 'mp4'];
+                                    if (accept_types.includes(file_type[1])) {
+                                        let result = e.target.result.toString();
+                                        previews.color.style.display = "none";
+                                        previews.image.style.display = "none";
+                                        previews.video.style.display = "none";
+                                        previews.miniProfile.color.style.display = "none";
+                                        previews.miniProfile.image.style.display = "none";
+                                        previews.miniProfile.video.style.display = "none";
+                                        if (file_type[0] == 'image') {
+                                            previews.image.style.display = "block";
+                                            previews.miniProfile.image.style.display = "block";
+                                            previews.image.src = result;
+                                            previews.miniProfile.image.src = result;
+                                        }
+                                        else if (file_type[0] == 'video') {
+                                            previews.video.style.display = "block";
+                                            previews.miniProfile.video.style.display = "block";
+                                            previews.video.src = result;
+                                            previews.miniProfile.video.src = result;
+                                        }
+                                        if (lastPage['name'] == 'profile' && lastPage['data'].username == user['username']) {
+                                            let banner = {
+                                                color: $('.banner-content-color'),
+                                                image: $('.banner-content-image'),
+                                                video: $('.banner-content-video'),
+                                                videoSrc: $('.banner-content-video video'),
+                                                modal: {
+                                                    image: $('.banner-content-modal-image'),
+                                                    video: $('.banner-content-modal-video'),
+                                                    imageSrc: $('.banner-content-modal img'),
+                                                    videoSrc: $('.banner-content-modal video')
+                                                }
+                                            };
+                                            banner.color.style.display = "none";
+                                            banner.image.style.display = "none";
+                                            banner.video.style.display = "none";
+                                            banner.modal.image.style.display = "none";
+                                            banner.modal.video.style.display = "none";
+                                            if (file_type[0] == 'image') {
+                                                banner.image.style.display = "block";
+                                                banner.modal.image.style.display = "block";
+                                                banner.image.style.backgroundImage = `url(${result})`;
+                                                banner.modal.imageSrc.src = result;
+                                            }
+                                            else {
+                                                banner.video.style.display = "block";
+                                                banner.modal.video.style.display = "block";
+                                                banner.videoSrc.src = result;
+                                                banner.modal.videoSrc.src = result;
+                                            }
+                                        }
+                                    }
+                                    profile_banner_input.value = null;
+                                    _file({
+                                        url: 'api/@me/client/contents/update/banner',
+                                        file: file
+                                    }).then(r => r);
+                                });
+                            }
+                        }
+                    });
+                    profile_avatar_input.addEventListener('change', function () {
+                        if (this.files && this.files[0]) {
+                            let file = this.files[0];
+                            let preview = $('.change-avatar-container .avatar-preview img');
+                            if (file.size < 8388608) {
+                                let reader = new FileReader();
+                                reader.readAsDataURL(file);
+                                reader.addEventListener("load", function (e) {
+                                    let result = e.target.result.toString();
+                                    let profileModal = $('#profile-avatar > div > div > div');
+                                    preview.src = result;
+                                    if (profileModal)
+                                        profileModal.style.backgroundImage = `url(${result})`;
+                                    $$('.pp-content img')
+                                        .forEach((img) => img.src = result);
+                                    profile_avatar_input.value = null;
+                                    _file({
+                                        url: 'api/@me/client/contents/update/avatar',
+                                        file: file
+                                    }).then(r => r);
+                                });
+                            }
+                        }
+                    });
+                    ding_dong_slider.checked = (doc.cookies.get('rwDdn') == "true");
+                    ding_dong_slider.addEventListener('click', function () {
+                        doc.cookies.set('rwDdn', this.checked.toString(), 300);
+                    });
+                    browser_notifications_slider.checked = (doc.cookies.get('rwBrn') == "true");
+                    browser_notifications_slider.addEventListener('click', function () {
+                        doc.cookies.set('rwBrn', this.checked.toString(), 300);
+                    });
+                    reduced_motion_mode_slider.checked = (doc.cookies.get('rwRm') == "true");
+                    reduced_motion_mode_slider.addEventListener('click', function () {
+                        ui.reducedMotionMode(this.checked);
+                        doc.cookies.set('rwRm', this.checked.toString(), 300);
+                    });
+                    range_line_height.value = doc.cookies.get('rwRlh');
+                    range_line_height.addEventListener('mouseup', () => {
+                        ui.changeLineHeight(parseInt(range_line_height.value));
+                    });
+                    range_font_size.value = doc.cookies.get('rwRfs');
+                    range_font_size.addEventListener('mouseup', function () {
+                        ui.changeFontSize(parseInt(range_font_size.value));
+                    });
+                    name_input.addEventListener('keyup', function () {
+                        let autoChangeElem = $('.settings-edit-profile-top-details-user-name span');
+                        autoChangeElem.innerText = name_input.value;
+                    });
+                    username_input.addEventListener('keyup', function () {
+                        let autoChangeElem = $('.settings-edit-profile-top-details-user-username span');
+                        if (this.value.length !== 0 && this.value !== '') {
+                            let newValue = this.value.split('').filter(ui.syncUsernameToAvailable).join('').toString();
+                            this.value = newValue;
+                            autoChangeElem.innerText = newValue;
+                        }
+                    });
+                });
+            if (!title)
+                title = menu_items[(category - 1)].innerText;
+            if (tab == 1) {
+                title_area.innerHTML = '';
+                title_length++;
+                newTitleGroup(title);
+            }
+            if (title_length !== group) {
+                for (let i = (group + 1); i < title_length; i++) {
+                    if (title_groups[i])
+                        title_groups[i].remove();
+                }
+            }
+            else {
+                newTitleGroup(title);
+            }
+            settings.scrollTop = 0;
+            app.modal('settings', true);
+            app.clickListener();
         }
         open(name, data = {}) {
             const body = $('body .app .center main#content');
@@ -514,6 +849,7 @@ var Glynet;
                 this.setTheme(user['theme'], false);
             });
             this.getRank();
+            ui.reducedMotionMode((doc.cookies.get('rwRm') == "true"));
             app.router(window.location.pathname.replace("/glynet.com/", ""));
         }
         getRank() {
@@ -561,6 +897,193 @@ var Glynet;
                         selectElement = 2;
                     $$('.theme-section-dropdown-button')[selectElement].setAttribute('selected', '');
                 }
+            }
+        }
+        updateColor(code) {
+            let selected_color = $('.settings-color-box-selected');
+            selected_color.style.setProperty('--box-color', '#' + code);
+            this.setColor('#' + code);
+            _({
+                url: 'api/@me/client/color/update',
+                data: { code }
+            }, (r) => {
+                console.log(code, r);
+            });
+        }
+        updateContents(type, remove = false) {
+            let inputs = {
+                avatar: $('.profile-avatar-change-input'),
+                banner: $('.profile-banner-change-input')
+            };
+            let previews = {
+                avatar: $('.change-avatar-container .avatar-preview img'),
+                banners: {
+                    color: $('.change-banner-container .banner .banner-content'),
+                    image: $('.change-banner-container .banner img'),
+                    video: $('.change-banner-container .banner video')
+                },
+                miniProfile: {
+                    color: $('.edit-profile-mini-profile-banner-area .banner-content'),
+                    image: $('.edit-profile-mini-profile-banner-area img'),
+                    video: $('.edit-profile-mini-profile-banner-area video'),
+                }
+            };
+            if (!remove) {
+                if (type == 1) {
+                    inputs.avatar.click();
+                }
+                else {
+                    inputs.banner.click();
+                }
+            }
+            else {
+                if (type == 1) {
+                    let profileModal = $('#profile-avatar > div > div > div');
+                    previews.avatar.src = 'img/avatar.png';
+                    if (profileModal)
+                        profileModal.style.backgroundImage = `url(img/avatar.png)`;
+                    $$('.pp-content img')
+                        .forEach((img) => img.src = 'img/avatar.png');
+                }
+                else {
+                    previews.banners.color.style.display = "block";
+                    previews.banners.image.style.display = "none";
+                    previews.banners.video.style.display = "none";
+                    previews.miniProfile.color.style.display = "block";
+                    previews.miniProfile.image.style.display = "none";
+                    previews.miniProfile.video.style.display = "none";
+                    if (lastPage['name'] == 'profile' && lastPage['data'].username == user['username']) {
+                        let banner = {
+                            color: $('.banner-content-color'),
+                            image: $('.banner-content-image'),
+                            video: $('.banner-content-video')
+                        };
+                        banner.color.style.display = "block";
+                        banner.image.style.display = "none";
+                        banner.video.style.display = "none";
+                    }
+                }
+                _({
+                    url: `api/@me/client/contents/remove/${type}`
+                });
+            }
+        }
+        updateSettings(type) {
+            const inputs = $$(`.settings-${type}`);
+            let rObj = [];
+            inputs.forEach((input) => {
+                rObj.push({
+                    name: input.type == 'radio' ? input.id.replace(`settings-radio-${type}-`, '') : input.classList[0].replace(`settings-key-${type}-`, ''),
+                    value: input.type == 'checkbox' || input.type == 'radio' ? input.checked : input.value
+                });
+            });
+            let urlType = window.btoa(unescape(encodeURIComponent(`settings-${type}`)));
+            let urlQuery = window.btoa(unescape(encodeURIComponent(JSON.stringify(rObj))));
+            _({
+                url: `api/@me/client/settings/update/${urlType}/${urlQuery}`.replaceAll('=', 'd3eve'),
+                method: 'POST'
+            }, (r) => {
+                console.log(JSON.parse(r['response']));
+            });
+            ui.desktop.settings.updateChanges();
+            ui.desktop.settings.saveChanges(false);
+        }
+        updatePassword() {
+            let oldPassword = $('.settings-change-password-input-old-password');
+            let newPassword = $('.settings-change-password-input-new-password');
+            let againPassword = $('.settings-change-password-input-again-password');
+            _({
+                url: 'api/@me/client/settings/password',
+                method: 'POST',
+                data: {
+                    currentPassword: oldPassword.value,
+                    newPassword: newPassword.value,
+                    againPassword: againPassword.value
+                }
+            }, (r) => {
+                let data = JSON.parse(r['response']);
+                switch (data.message) {
+                    case 3441:
+                        app.bottomAlert('Şifreler birbirleriyle uyuşmuyor veya 8 karakterden kısa');
+                        break;
+                    case 3442:
+                        app.bottomAlert('Girdiğiniz şifre geçerli değil');
+                        break;
+                }
+                if (data.status) {
+                    oldPassword.value = '';
+                    newPassword.value = '';
+                    againPassword.value = '';
+                    app.settings(1);
+                    user['token'] = data.token;
+                    app.bottomAlert('Şifre başarıyla değiştirildi');
+                }
+            });
+        }
+        updateAccountPreferences(type) {
+            let inputs = [
+                {
+                    value: $('.settings-update-account-email-input'),
+                    preview: {
+                        text: $('.settings-update-account-email-preview-input'),
+                        container: $('.account-settings-top-email')
+                    },
+                    password: $('.settings-update-account-email-password-input')
+                },
+                {
+                    value: $('.settings-update-account-phone-input'),
+                    preview: {
+                        text: $('.settings-update-account-phone-preview-input'),
+                        container: $('.account-settings-top-phone-number')
+                    },
+                    password: $('.settings-update-account-phone-password-input')
+                }
+            ];
+            if (inputs[type].password.value.length !== 0) {
+                _({
+                    url: `api/@me/client/account/update/${type}`,
+                    data: {
+                        value: btoa(inputs[type].value.value),
+                        password: btoa(inputs[type].password.value)
+                    }
+                }, (r) => {
+                    let data = JSON.parse(r['response']);
+                    if (data.status) {
+                        if (inputs[type].value.value.length == 0) {
+                            inputs[type].preview.container.style.display = "none";
+                        }
+                        else {
+                            inputs[type].preview.container.style.display = "block";
+                        }
+                        app.settings(1);
+                        inputs[type].preview.text.innerText = inputs[type].value.value;
+                        inputs[type].value.value = "";
+                        inputs[type].password.value = "";
+                    }
+                    switch (data.message) {
+                        case 6900:
+                            app.bottomAlert('E-posta boş bırakılamaz');
+                            break;
+                        case 6910:
+                            app.bottomAlert('Girilen değer çok az, minimum 8 karakter girilmelidir');
+                            break;
+                        case 7100:
+                            app.bottomAlert('E-posta başarıyla güncellendi');
+                            break;
+                        case 7110:
+                            app.bottomAlert('Girilen e-posta standart dışı');
+                            break;
+                        case 8100:
+                            app.bottomAlert('Telefon numaranız başarıyla güncellendi');
+                            break;
+                        case 9100:
+                            app.bottomAlert('Şifre başarıyla güncellendi');
+                            break;
+                        case 10000:
+                            app.bottomAlert('Girilen şifre hatalı');
+                            break;
+                    }
+                });
             }
         }
         notifications() {
@@ -767,7 +1290,7 @@ var Glynet;
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="plus"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><path d="M19 11h-6V5a1 1 0 0 0-2 0v6H5a1 1 0 0 0 0 2h6v6a1 1 0 0 0 2 0v-6h6a1 1 0 0 0 0-2z"/></g></g></svg>
                                     </div>
                                 </div>
-                                <div class="story-image">
+                                <div class="story-image pp-content">
                                     <div class="story-image-filter"></div>
                                     <img src="${storyData['client'].details.avatar}" alt="Profil resminiz">
                                 </div>
@@ -1065,6 +1588,62 @@ var Glynet;
                 app.confirm('Onay', 'Sizi takip eden birisini takipçi listenizden çıkarmak üzeresiniz, bu işlem asla geri alınamaz ve kullanıcı tekrar sizi takip edebilir.', ['Çıkar', 'İptal'], `profile.removeFollower(${id}, true)`);
             }
         }
+        unBlock(id, element) {
+            switch (element) {
+                default:
+                case 'blocked-user':
+                    $(`.blocked-user-${id}`).remove();
+                    if ($$('.blocked-user').length == 0) {
+                        $('.no-blocked-user-container').style.display = "block";
+                        $('.blocked-users-list').style.display = "none";
+                    }
+                    break;
+            }
+            _({
+                url: `api/@me/profile/block/${id}`,
+                method: 'POST'
+            });
+        }
+        getBlockedUsers(type = 'block') {
+            _({
+                url: `api/@me/profile/blocked_users/${type}`,
+                method: 'GET'
+            }, (r) => {
+                const empty = $('.no-blocked-user-container');
+                const area = $('.blocked-users-list');
+                const data = JSON.parse(r['response']);
+                if (data.status) {
+                    area.innerHTML = "";
+                    if (data.users.length == 0) {
+                        empty.style.display = "block";
+                        area.style.display = "none";
+                    }
+                    else {
+                        empty.style.display = "none";
+                        area.style.display = "block";
+                        data.users.forEach((item) => {
+                            area.innerHTML += `
+                                <div class="blocked-user blocked-user-${item.user.id}">
+                                    <div class="blocked-user-left">
+                                        <img src="${item.user.avatar}" alt="">
+                                    </div>
+                                    <div class="blocked-user-right">
+                                        <div class="blocked-user-details">
+                                            <span>${item.user.name}</span>
+                                            <span>@${item.user.username}</span>
+                                        </div>
+                                        <div @click="profile.unBlock(${item.user.id}, 'blocked-user')" class="blocked-user-unblock btn-${Math.floor(Math.random() * 3000) - 1} blocked-user-unblock-btn-${item.user.id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="close"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><path d="M13.41 12l4.3-4.29a1 1 0 1 0-1.42-1.42L12 10.59l-4.29-4.3a1 1 0 0 0-1.42 1.42l4.3 4.29-4.3 4.29a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l4.29-4.3 4.29 4.3a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42z"/></g></g></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        app.clickListener();
+                    }
+                }
+            });
+        }
     }
     Glynet.Profile = Profile;
 })(Glynet || (Glynet = {}));
@@ -1082,6 +1661,10 @@ document.addEventListener("DOMContentLoaded", function () {
     client.setTheme(doc.cookies.get('theme') == undefined ? 1 : parseInt(doc.cookies.get('theme')), false);
     app.scrollToTop();
     app.clickListener();
+    ui.changeFontSize(parseInt(doc.cookies.get('rwRfs')));
+    ui.changeLineHeight(parseInt(doc.cookies.get('rwRlh')));
+    app.settings(2);
+    setTimeout(() => app.settings(2), 300);
     window.onpopstate = () => app.router(window.location.pathname.replace("/glynet.com/", ""));
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('search-input'))

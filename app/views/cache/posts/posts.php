@@ -3,8 +3,12 @@
 <div class="post post-<?=$post['id']?> post-type-<?=$post['type']?>">
     <div class="post-author">
         <div class="post-author-left">
+            <?php if ($post['author']['isMyProfile'] == true): ?>
+            <div class="post-author-avatar pp-content">
+            <?php else: ?>
             <div class="post-author-avatar">
-                <img src="<?=$post['author']['avatar']?>">
+            <?php endif; ?>
+                <img src="<?=$post['author']['avatar']?>" alt="">
             </div>
             <div class="post-author-details">
                 <div class="post-author-name">

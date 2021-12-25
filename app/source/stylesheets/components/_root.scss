@@ -1,7 +1,18 @@
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+@import "../themes/light";
+@import "../themes/dark";
+@import "../themes/purple";
+
 :root {
     --desktop-right-menu-width: 390px;
     @each $name, $value in $variables-light {
         --#{$name}: #{$value};
+    }
+
+    @for $i from 10 through 40 {
+        --font-size-#{$i}px: #{$i}px;
     }
 }
 

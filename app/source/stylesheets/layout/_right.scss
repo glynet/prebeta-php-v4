@@ -285,8 +285,8 @@
                             margin-left: 8px;
 
                             span {
+                                @include font('19px', 'Gilroy-Medium');
                                 user-select: text;
-                                font-size: 19px;
                                 color: var(--grey);
                             }
                         }

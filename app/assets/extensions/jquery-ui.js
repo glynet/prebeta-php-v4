@@ -2624,7 +2624,7 @@ function standardAnimationOption( option ) {
 		return true;
 	}
 
-	// Options hash (but not naming an effect)
+	// UserOptions hash (but not naming an effect)
 	if ( typeof option === "object" && !option.effect ) {
 		return true;
 	}
@@ -6335,8 +6335,8 @@ var widgetsControlgroup = $.widget( "ui.controlgroup", {
 
 			// We assume everything is in the middle to start because we can't determine
 			// first / last elements until all enhancments are done.
-			if ( that[ "_" + widget + "Options" ] ) {
-				options = that[ "_" + widget + "Options" ]( "middle" );
+			if ( that[ "_" + widget + "UserOptions" ] ) {
+				options = that[ "_" + widget + "UserOptions" ]( "middle" );
 			} else {
 				options = { classes: {} };
 			}
@@ -6507,8 +6507,8 @@ var widgetsControlgroup = $.widget( "ui.controlgroup", {
 			$.each( [ "first", "last" ], function( index, value ) {
 				var instance = children[ value ]().data( "ui-controlgroup-data" );
 
-				if ( instance && that[ "_" + instance.widgetName + "Options" ] ) {
-					var options = that[ "_" + instance.widgetName + "Options" ](
+				if ( instance && that[ "_" + instance.widgetName + "UserOptions" ] ) {
+					var options = that[ "_" + instance.widgetName + "UserOptions" ](
 						children.length === 1 ? "only" : value
 					);
 					options.classes = that._resolveClassesValues( options.classes, instance );
@@ -7253,7 +7253,7 @@ function Datepicker() {
 		showOn: "focus", // "focus" for popup on focus,
 			// "button" for trigger button, or "both" for either
 		showAnim: "fadeIn", // Name of jQuery animation for popup
-		showOptions: {}, // Options for enhanced animations
+		showOptions: {}, // UserOptions for enhanced animations
 		defaultDate: null, // Used when field is blank: actual date,
 			// +/-number for offset from today, null for today
 		appendText: "", // Display text following the input box, e.g. showing the format
@@ -13808,7 +13808,7 @@ var widgetsSelectable = $.widget( "ui.selectable", $.ui.mouse, {
 //>>label: Selectmenu
 //>>group: Widgets
 // jscs:disable maximumLineLength
-//>>description: Duplicates and extends the functionality of a native HTML select element, allowing it to be customizable in behavior and appearance far beyond the limitations of a native select.
+//>>description: Duplicates and src the functionality of a native HTML select element, allowing it to be customizable in behavior and appearance far beyond the limitations of a native select.
 // jscs:enable maximumLineLength
 //>>docs: http://api.jqueryui.com/selectmenu/
 //>>demos: http://jqueryui.com/selectmenu/

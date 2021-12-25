@@ -12,7 +12,7 @@ class Router {
         return explode('?', str_replace([$dirname, $basename], null, $_SERVER['REQUEST_URI']))[0];
     }
 
-    public static function listen($url, $callback)
+    public static function listen(string $url, mixed $callback): void
     {
         self::$routers++;
 
@@ -32,10 +32,9 @@ class Router {
         }
     }
 
-    public static function checkErrors()
+    public static function checkErrors(): void
     {
-        if (self::$routers_errors == self::$routers) {
-            echo "Böyle bir sayfa yok?!?!";
-        }
+        if (self::$routers_errors == self::$routers)
+            echo "Yanlış yoldasın, çevreyolundan gitmen gerekiyor.";
     }
 }

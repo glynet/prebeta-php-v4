@@ -25,6 +25,7 @@ class Contacts {
         }
         // Closest users end
 
+        /*
         // Audit log users start
         $auditlog_users = db::select("auditlog", "user='$client->id' && activity='profile' ORDER BY id DESC LIMIT 0,6");
         foreach (db::fetchAll($auditlog_users) as $al) {
@@ -45,6 +46,7 @@ class Contacts {
             }
         }
         // Audit log users end
+        */
 
         return $list;
     }
@@ -57,14 +59,14 @@ class Contacts {
             'name' => $data->name,
             'username' => $data->username,
             'avatar' => $data->avatar,
-            'isVerified' => boolval($data->isVerified)
+            'isVerified' => boolval($data->is_verified)
         ];
     }
 }
 
 class Search
 {
-    public static function query(string $text): array
+    public static function query(string $text): string|bool
     {
         $users = db::select("users", "username LIKE '%" . $text . "%' || name LIKE '%" . $text . "%' LIMIT 4");
         $hashtags = db::select("trending_hashtags", "name LIKE '%" . $text . "' LIMIT 4");
@@ -111,7 +113,7 @@ class Search
             }
         }
 
-        return $return;
+        return json_encode($return);
     }
 }
 

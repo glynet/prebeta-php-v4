@@ -20,6 +20,19 @@
     }
 }
 
+@function strip-units($number) {
+    @return $number / ($number * 0 + 1);
+}
+
+
+@function pixels-to-percent($target, $parent: 16) {
+    @return percentage($target / $parent);
+}
+
+@mixin alphaColor($alpha, $color, $element) {
+    #{$element}: rgba(red($color), green($color), blue($color), $alpha);
+}
+
 @mixin animation($str) {
     -webkit-animation: #{$str};
     -moz-animation: #{$str};
@@ -30,7 +43,7 @@
 }
 
 @mixin font($size, $family) {
-    font-size: #{$size};
+    font-size: var(--font-size-#{$size});
     font-family: #{$family}, Arial, sans-serif;
     font-variant: normal;
 }

@@ -30,7 +30,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="info"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14a1 1 0 0 1-2 0v-5a1 1 0 0 1 2 0zm-1-7a1 1 0 1 1 1-1 1 1 0 0 1-1 1z"/></g></g></svg>
                     </div>
                     <div class="text">
-                        <span>{{ %profile['other']['bio'] }}</span>
+                        <span>{{ %profile['other']['about'] }}</span>
                     </div>
                 </div>
                 <div class="intro-data">
@@ -80,12 +80,22 @@
             <div class="banner-filter">
                 @if(%profile['banner']['type'] == 'image')
                     @if(%profile['banner']['url'] == '')
-                <div class="banner-content" style="background: {{ %profile['color'] }} !important;"></div>
+                <div class="banner-content banner-content-color" style="background: {{ %profile['color'] }} !important;"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-image" style="background-image:url({{ %profile['banner']['url'] }}); display: none;"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-video" style="display: none;">
+                    <video src="{{ %profile['banner']['url'] }}" autoplay muted loop></video>
+                </div>
                     @else
-                <div @click="app.modal('profile-banner', true)" class="banner-content" style="background-image:url({{ %profile['banner']['url'] }});"></div>
+                <div class="banner-content banner-content-color" style="background: {{ %profile['color'] }} !important; display: none;"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-image" style="background-image:url({{ %profile['banner']['url'] }});"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-video" style="display: none;">
+                    <video src="{{ %profile['banner']['url'] }}" autoplay muted loop></video>
+                </div>
                     @endif
                 @else
-                <div @click="app.modal('profile-banner', true)" class="banner-content">
+                <div class="banner-content banner-content-color" style="background: {{ %profile['color'] }} !important; display: none;"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-image" style="background-image:url({{ %profile['banner']['url'] }}); display: none;"></div>
+                <div @click="app.modal('profile-banner', true)" class="banner-content banner-content-video">
                     <video src="{{ %profile['banner']['url'] }}" autoplay muted loop></video>
                 </div>
                 @endif
@@ -115,7 +125,11 @@
             @endif
         </div>
         <div class="user-details">
+            @if(%profile['isMyProfile'] == true)
+            <div @click="app.modal('profile-avatar', true);" class="user-avatar pp-content">
+            @else
             <div @click="app.modal('profile-avatar', true);" class="user-avatar">
+            @endif
                 <img src="{{ %profile['avatar'] }}" alt="{{ %profile['name'] }} adlı kullanıcının profil resmi">
             </div>
             <div class="user-name-parent">
@@ -132,8 +146,8 @@
                     <span>{{ %profile['username'] }}</span>
                 </div>
             </div>
-            <div class="user-bio">
-                <span>{{ %profile['other']['bio'] }}</span>
+            <div class="user-about">
+                <span>{{ %profile['other']['about'] }}</span>
             </div>
             @if(%profile['other']['website'] !== '')
             <div class="user-link">
@@ -216,7 +230,11 @@
 
     <div class="modal" id="profile-avatar">
         <div class="modal-content">
+            @if(%profile['isMyProfile'] == true)
+            <div class="template-6 pp-content">
+            @else
             <div class="template-6">
+            @endif
                 <div class="pp-bg" style="background-image: url({{ %profile['avatar'] }});"></div>
                 <img class="pp-img" src="{{ %profile['avatar'] }}" alt="Profile image">
             </div>
@@ -227,11 +245,17 @@
         <div class="modal-content" full-screen no-background>
             <div class="template-6">
                 @if(%profile['banner']['type'] == 'image')
-                <div class="banner-content-modal">
+                <div class="banner-content-modal banner-content-modal-image">
                     <img src="{{ %profile['banner']['url'] }}" alt="Profil kapak fotoğrafı">
                 </div>
+                <div class="banner-content-modal banner-content-modal-video" style="display: none;">
+                    <video src="{{ %profile['banner']['url'] }}" autoplay muted loop></video>
+                </div>
                 @else
-                <div class="banner-content-modal">
+                <div class="banner-content-modal banner-content-modal-image" style="display: none;">
+                    <img src="{{ %profile['banner']['url'] }}" alt="Profil kapak fotoğrafı">
+                </div>
+                <div class="banner-content-modal banner-content-modal-video">
                     <video src="{{ %profile['banner']['url'] }}" autoplay muted loop></video>
                 </div>
                 @endif

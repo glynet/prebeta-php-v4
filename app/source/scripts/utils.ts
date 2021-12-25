@@ -38,8 +38,13 @@ let activeModalClassList: string = '';
 let activeDropdownClassList: string = '';
 let activePostMenuClassList: boolean = false;
 let searchSuggestionsSelectedItem: number = 0;
+let settingsTab: number = 0;
 
 const ui = {
+    syncUsernameToAvailable: (string: string) => {
+        const res = /^[a-zA-Z0-9_.]+$/.exec(string);
+        return !!res;
+    },
     addDots: (string: string, limit: number) => {
         let dots = "...";
 
@@ -47,6 +52,40 @@ const ui = {
             string = string.substring(0, limit) + dots;
 
         return string;
+    },
+    reducedMotionMode: (open: boolean = true) => {
+        let body = $('body');
+        body.classList.remove('reduced-motion-mode');
+
+        if (open)
+            body.classList.add('reduced-motion-mode');
+    },
+    changeLineHeight: (value: number = 7) => {
+        let default_value = 7;
+        let default_line_height = 24;
+
+        doc.cookies.set('rwRlh', `${value}`, 300);
+
+        if ((value - default_value) < 0) {
+            $('body').style.lineHeight = `${default_line_height - Math.abs(value - default_value)}px`;
+        } else {
+            $('body').style.lineHeight = `${default_line_height + Math.abs(value - default_value)}px`;
+        }
+    },
+    changeFontSize: (value: number = 9) => {
+        let default_value = 9;
+
+        doc.cookies.set('rwRfs', value.toString(), 300);
+
+        if ((value - default_value) < 0) {
+            for (let i = 10; i < 40; i++) {
+                document.documentElement.style.setProperty(`--font-size-${i}px`, `${i - Math.abs(value - default_value)}px`);
+            }
+        } else {
+            for (let i = 10; i < 40; i++) {
+                document.documentElement.style.setProperty(`--font-size-${i}px`, `${i + Math.abs(value - default_value)}px`);
+            }
+        }
     },
     color: {
         changeBrightness: (color,  percent) => {
@@ -227,6 +266,62 @@ const ui = {
                     app.clickListener();
                 }
             }
+        },
+        settings: {
+            updateChanges: () => {
+                let inputs = $$(`.settings-${settingsTab}`);
+
+                inputs.forEach((item: HTMLInputElement) => {
+                    if (item.type == 'checkbox' || item.type == 'radio') {
+                        item.setAttribute('data-default-value', String(item.checked));
+                    } else {
+                        item.setAttribute('data-default-value', item.value);
+                    }
+                });
+            },
+            changesControl: (restore: boolean = false) => {
+                let inputs = $$(`.settings-${settingsTab}`);
+                let changed: number = 0;
+
+                for (let i = 0; i < inputs.length; i++) {
+                    let input = <HTMLInputElement>inputs[i];
+                    let value = input.type == 'checkbox' || input.type == 'radio' ? input.checked.toString() : input.value;
+
+                    if (value !== input.getAttribute('data-default-value')) {
+                        if (restore) {
+                            if (input.type == 'checkbox') {
+                                input.checked = (input.getAttribute('data-default-value') == 'true');
+                            } else if (input.type == 'radio') {
+                                input.checked = (input.getAttribute('data-default-value') == 'true');
+                            } else {
+                                input.value = input.getAttribute('data-default-value');
+                            }
+                        } else {
+                            changed++;
+                        }
+                    }
+                }
+
+                if (changed == 0) {
+                    return ui.desktop.settings.saveChanges(false);
+                } else {
+                    return ui.desktop.settings.saveChanges(true);
+                }
+            },
+            saveChanges: (show: boolean = true) => {
+                let container = $('.save-changes-container');
+                let dynamic_content = $('.settings-dynamic');
+
+                if (show) {
+                    dynamic_content.style.paddingBottom = '90px';
+                    container.style.display = 'flex';
+                    setTimeout(() => container.style.opacity = '1', 100);
+                } else {
+                    dynamic_content.style.paddingBottom = 'var(--settings-content-padding)';
+                    container.style.opacity = '0';
+                    setTimeout(() => container.style.display = 'none', 100);
+                }
+            }
         }
     }
 }
@@ -257,6 +352,16 @@ const $ = (name: string) => <HTMLElement>window.document.querySelector(name);
 const $$ = (name: string) => window.document.querySelectorAll<HTMLElement>(name);
 
 const $$$ = (name: string, callback: any) => $(name).onclick = callback;
+
+const _file = async ({url, file}) => {
+    let formData = new FormData();
+    formData.append("file", file);
+
+    await fetch(url, {
+        method: "POST",
+        body: formData
+    }).then(r => r);
+}
 
 const _ = ({ url, method = "GET", data = {} }, callback: any = null) => {
     const request = new XMLHttpRequest();

@@ -1,0 +1,78 @@
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+.checkmark-container {
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+
+    .checkmark-content {
+        --padding: 15px;
+        --checkmark-bg: #f3f4f6;
+
+        background: var(--checkmark-bg);
+        border: 1px solid var(--border-color);
+        position: relative;
+        padding: var(--padding) calc(var(--padding) * 3 + 5px);
+        padding-right: var(--padding);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: .1s;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        span {
+            color: var(--grey);
+            @include font('20px', 'Gilroy-Bold');
+        }
+
+        input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+
+            &:checked ~ .checkmark {
+                background-color: var(--app-color);
+            }
+        }
+
+        .image {
+            position: relative;
+            float: right;
+            height: 22px;
+
+            img {
+                height: 22px;
+                width: 33px;
+                pointer-events: none;
+                border-radius: 3px;
+            }
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: var(--padding);
+            height: 25px;
+            width: 25px;
+            background-color: var(--checkmark-bg);
+            border-radius: 50%;
+            border: 3px solid rgba(128, 128, 128, 0.62);
+        }
+
+        input:checked ~ .checkmark {
+            border-color: var(--app-color) !important;
+        }
+
+        &:hover {
+            background: var(--i-hover) !important;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}

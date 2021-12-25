@@ -1,3 +1,5 @@
+// noinspection JSJQueryEfficiency
+
 namespace Glynet
 {
     export class Application
@@ -65,13 +67,28 @@ namespace Glynet
 
         clickListener(): void
         {
-            $$("div, span, img").forEach((elem: HTMLElement) => {
+            $$("div, span, img, button, label").forEach((elem: HTMLElement) => {
                 let click = elem.getAttribute("@click");
 
                 if (click?.length > 0 || click !== null) {
                     const classname = `.${[].slice.apply(elem.classList).join('.')}`;
                     $$$(classname, () => eval(click));
                     $(classname).removeAttribute("@click");
+                }
+            });
+
+            $$("input, textarea").forEach((elem: HTMLInputElement) => {
+                const classname = `.${[].slice.apply(elem.classList).join('.')}`;
+                let max_length = elem.getAttribute("@max_length");
+
+                if (max_length?.length > 0 || max_length !== null) {
+                    $(classname).removeAttribute("@max_length");
+
+                    $(classname).addEventListener('keyup', function () {
+                        if (elem.value.length >= Number(max_length)) {
+                            elem.value = elem.value.slice(0, Number(max_length));
+                        }
+                    });
                 }
             });
         }
@@ -83,6 +100,7 @@ namespace Glynet
             switch (alertType) {
                 case 0: alert = 'Sayfa bağlantısı panoya kopyalandı!'; break;
                 case 1: alert = 'Gönderi bağlantısı panoya kopyalandı'; break;
+                case 3: alert = 'Bağlantı panoya kopyalandı!'; break;
             }
     
             let inp = <HTMLInputElement>$('.clipboard label input');
@@ -91,6 +109,254 @@ namespace Glynet
             inp.select();
             document.execCommand('copy');
             this.bottomAlert(alert);
+        }
+
+        settings(category: number = 1, tab: number = 1, group: number = 1, title?: string): void
+        {
+            let title_area = $('.title-bar');
+            let title_groups = $$('.title-bar label');
+            let title_length = title_groups.length;
+
+            let menu_items = $$('.settings-menu .menu-group .group-item');
+            let contents = $$('.settings-details-container');
+            let settings = $('.settings-content');
+            let settings_dynamic = $('.settings-dynamic');
+
+            settingsTab = category;
+
+            function newTitleGroup(title: string): void
+            {
+                let node = document.createElement("label");
+                node.innerHTML = `
+                    <div @click="app.settings(${category}, ${tab}, ${group});" data-c="${category}" data-t="${tab}" class="title-group title-tab-${tab} title-group-${group} title-group-id-${Math.floor(Math.random() * 9999)}">
+                        <div class="text">
+                            <span>${title}</span>
+                        </div>
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="chevron-right"><rect width="24" height="24" transform="rotate(-90 12 12)" opacity="0"/><path d="M10.5 17a1 1 0 0 1-.71-.29 1 1 0 0 1 0-1.42L13.1 12 9.92 8.69a1 1 0 0 1 0-1.41 1 1 0 0 1 1.42 0l3.86 4a1 1 0 0 1 0 1.4l-4 4a1 1 0 0 1-.7.32z"/></g></g></svg>
+                        </div>
+                    </div>
+                `;
+
+                title_area.appendChild(node);
+            }
+
+            menu_items.forEach(m => m.removeAttribute('selected'));
+            menu_items[(category - 1)].setAttribute('selected', 'true');
+
+            contents.forEach(c => c.style.display = 'none');
+            contents.forEach(c => {
+                if (c.getAttribute('data-category') == category.toString() && c.getAttribute('data-tab') == tab.toString() && c.getAttribute('data-group') == group.toString())
+                    c.style.display = 'block';
+            });
+
+            if (title_area.innerText.length == 0)
+                _({
+                    url: 'pages/settings',
+                    method: 'GET'
+                }, (r: object) => {
+                    settings_dynamic.innerHTML = r['response'];
+
+                    let range_font_size = <HTMLInputElement>$('.range-slider-font-size');
+                    let range_line_height = <HTMLInputElement>$('.range-slider-line-height');
+                    let username_input = <HTMLInputElement>$('.settings-key-2-username.settings-inputs');
+                    let name_input = <HTMLInputElement>$('.settings-key-2-name.settings-inputs');
+                    let reduced_motion_mode_slider = <HTMLInputElement>$('.settings-reduced-motion-mode-slider');
+                    let ding_dong_slider = <HTMLInputElement>$('.settings-ding-dong-notifications-slider');
+                    let browser_notifications_slider = <HTMLInputElement>$('.settings-browser-notifications-slider');
+                    let profile_avatar_input = <HTMLInputElement>$('.profile-avatar-change-input');
+                    let profile_banner_input = <HTMLInputElement>$('.profile-banner-change-input');
+                    let inputs = $$('.settings-inputs');
+
+                    profile.getBlockedUsers();
+
+                    inputs.forEach((i: HTMLInputElement) => {
+                        i.addEventListener(i.type == 'checkbox' ? 'change' : i.type == 'radio' ? 'click' : 'keyup', () => {
+                           ui.desktop.settings.changesControl();
+                        });
+                    });
+
+                    profile_banner_input.addEventListener('change', function () {
+                        if (this.files && this.files[0]) {
+                            let file = this.files[0];
+                            let previews = {
+                                color: $('.change-banner-container .banner .banner-content'),
+                                image: <HTMLImageElement>$('.change-banner-container .banner img'),
+                                video: <HTMLVideoElement>$('.change-banner-container .banner video'),
+                                miniProfile: {
+                                    color: $('.edit-profile-mini-profile-banner-area .banner-content'),
+                                    image: <HTMLImageElement>$('.edit-profile-mini-profile-banner-area img'),
+                                    video: <HTMLVideoElement>$('.edit-profile-mini-profile-banner-area video'),
+                                }
+                            }
+
+                            if (file.size < 33554432) {
+                                let reader = new FileReader();
+                                reader.readAsDataURL(file);
+                                reader.addEventListener("load", function(e) {
+                                    let file_type = file.type.split('/');
+                                    let accept_types = [ 'jpg', 'png', 'jpeg', 'mp4' ];
+
+                                    if (accept_types.includes(file_type[1])) {
+                                        let result = e.target.result.toString();
+
+                                        previews.color.style.display = "none";
+                                        previews.image.style.display = "none";
+                                        previews.video.style.display = "none";
+                                        previews.miniProfile.color.style.display = "none";
+                                        previews.miniProfile.image.style.display = "none";
+                                        previews.miniProfile.video.style.display = "none";
+
+                                        if (file_type[0] == 'image') {
+                                            previews.image.style.display = "block";
+                                            previews.miniProfile.image.style.display = "block";
+                                            previews.image.src = result;
+                                            previews.miniProfile.image.src = result;
+                                        } else if (file_type[0] == 'video') {
+                                            previews.video.style.display = "block";
+                                            previews.miniProfile.video.style.display = "block";
+                                            previews.video.src = result;
+                                            previews.miniProfile.video.src = result;
+                                        }
+
+                                        if (lastPage['name'] == 'profile' && lastPage['data'].username == user['username']) {
+                                            let banner = {
+                                                color: $('.banner-content-color'),
+                                                image: $('.banner-content-image'),
+                                                video: $('.banner-content-video'),
+                                                videoSrc: <HTMLVideoElement>$('.banner-content-video video'),
+                                                modal: {
+                                                    image: $('.banner-content-modal-image'),
+                                                    video: $('.banner-content-modal-video'),
+                                                    imageSrc: <HTMLImageElement>$('.banner-content-modal img'),
+                                                    videoSrc: <HTMLVideoElement>$('.banner-content-modal video')
+                                                }
+                                            }
+
+                                            banner.color.style.display = "none";
+                                            banner.image.style.display = "none";
+                                            banner.video.style.display = "none";
+                                            banner.modal.image.style.display = "none";
+                                            banner.modal.video.style.display = "none";
+
+                                            if (file_type[0] == 'image') {
+                                                banner.image.style.display = "block";
+                                                banner.modal.image.style.display = "block";
+                                                banner.image.style.backgroundImage = `url(${result})`;
+                                                banner.modal.imageSrc.src = result;
+                                            } else {
+                                                banner.video.style.display = "block";
+                                                banner.modal.video.style.display = "block";
+                                                banner.videoSrc.src = result;
+                                                banner.modal.videoSrc.src = result;
+                                            }
+                                        }
+                                    }
+
+                                    profile_banner_input.value = null;
+
+                                    _file({
+                                        url: 'api/@me/client/contents/update/banner',
+                                        file: file
+                                    }).then(r => r);
+                                });
+                            }
+                        }
+                    });
+
+                    profile_avatar_input.addEventListener('change', function () {
+                        if (this.files && this.files[0]) {
+                            let file = this.files[0];
+                            let preview = <HTMLImageElement>$('.change-avatar-container .avatar-preview img');
+
+                            if (file.size < 8388608) {
+                                let reader = new FileReader();
+                                reader.readAsDataURL(file);
+                                reader.addEventListener("load", function(e) {
+                                    let result = e.target.result.toString();
+                                    let profileModal = $('#profile-avatar > div > div > div');
+                                    preview.src = result;
+
+                                    if (profileModal)
+                                        profileModal.style.backgroundImage = `url(${result})`;
+
+                                    $$('.pp-content img')
+                                        .forEach((img: HTMLImageElement) => img.src = result);
+
+                                    profile_avatar_input.value = null;
+
+                                    _file({
+                                        url: 'api/@me/client/contents/update/avatar',
+                                        file: file
+                                    }).then(r => r);
+                                });
+                            }
+                        }
+                    });
+
+                    ding_dong_slider.checked = (doc.cookies.get('rwDdn') == "true");
+                    ding_dong_slider.addEventListener('click', function () {
+                        doc.cookies.set('rwDdn', this.checked.toString(), 300);
+                    });
+
+                    browser_notifications_slider.checked = (doc.cookies.get('rwBrn') == "true");
+                    browser_notifications_slider.addEventListener('click', function () {
+                        doc.cookies.set('rwBrn', this.checked.toString(), 300);
+                    });
+
+                    reduced_motion_mode_slider.checked = (doc.cookies.get('rwRm') == "true");
+                    reduced_motion_mode_slider.addEventListener('click', function () {
+                        ui.reducedMotionMode(this.checked);
+                        doc.cookies.set('rwRm', this.checked.toString(), 300);
+                    });
+
+                    range_line_height.value = doc.cookies.get('rwRlh');
+                    range_line_height.addEventListener('mouseup', () => {
+                        ui.changeLineHeight(parseInt(range_line_height.value));
+                    });
+
+                    range_font_size.value = doc.cookies.get('rwRfs');
+                    range_font_size.addEventListener('mouseup', function() {
+                        ui.changeFontSize(parseInt(range_font_size.value));
+                    });
+
+                    name_input.addEventListener('keyup', function() {
+                        let autoChangeElem = $('.settings-edit-profile-top-details-user-name span');
+                        autoChangeElem.innerText = name_input.value;
+                    });
+
+                    username_input.addEventListener('keyup', function() {
+                        let autoChangeElem = $('.settings-edit-profile-top-details-user-username span');
+
+                        if (this.value.length !== 0 && this.value !== '') {
+                            let newValue = this.value.split('').filter(ui.syncUsernameToAvailable).join('').toString();
+                            this.value = newValue;
+                            autoChangeElem.innerText = newValue;
+                        }
+                    });
+                });
+
+            if (!title)
+                title = menu_items[(category - 1)].innerText;
+
+            if (tab == 1) {
+                title_area.innerHTML = '';
+                title_length++;
+                newTitleGroup(title);
+            }
+
+            if (title_length !== group) {
+                for (let i = (group + 1); i < title_length; i++) {
+                    if (title_groups[i])
+                        title_groups[i].remove();
+                }
+            } else {
+                newTitleGroup(title);
+            }
+
+            settings.scrollTop = 0;
+            app.modal('settings', true);
+            app.clickListener();
         }
     
         open(name: string, data: object = {}): void
@@ -277,7 +543,7 @@ namespace Glynet
     
         follow(id: number, type: number): void
         {
-            // 1: Profile, 2: Modal...
+            // 1: UserOptions, 2: Modal...
     
             switch (type) {
                 case 1:

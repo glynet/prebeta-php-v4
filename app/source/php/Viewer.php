@@ -5,7 +5,7 @@ namespace Glynet\Viewer;
 class UI {
     public static bool|string $view;
 
-    public static function render(string $view, array $data = [])
+    public static function render(string $view, array $data = []): string
     {
         $dir = str_replace('/index.php', '', $_SERVER['SCRIPT_FILENAME']);
         extract($data);
@@ -32,19 +32,19 @@ class UI {
         require $viewCachePath;
     }
 
-    public static function parse()
+    public static function parse(): void
     {
         self::parseVariables();
         self::parseForeach();
         self::parseIfElse();
     }
 
-    public static function restore($str): array|string|null
+    public static function restore(string $str): array|string|null
     {
         return preg_replace('/\+/', '', preg_replace('/\%/s', '$', $str));
     }
 
-    public static function parseVariables()
+    public static function parseVariables(): void
     {
         self::$view = preg_replace_callback('/{{(.*?)}}/', function($variable) {
             $var = trim($variable[1]);
@@ -57,7 +57,7 @@ class UI {
         }, self::$view);
     }
 
-    public static function parseForeach()
+    public static function parseForeach(): void
     {
         self::$view = preg_replace_callback('/@foreach\((.*?) as (.*?)\)/', function($variable) {
             if (strstr($variable[2], '=>')) {
@@ -71,7 +71,7 @@ class UI {
         }, self::$view);
     }
 
-    public static function parseIfElse()
+    public static function parseIfElse(): void
     {
         self::$view = preg_replace_callback('/@if\((.*?) (.*?) (.*?)\)/', function($variable) {
             return '<?php if (' . self::restore(trim($variable[1])) . ' ' . trim($variable[2]) . ' ' . self::restore(trim($variable[3])) . '): ?>';

@@ -1,6 +1,13 @@
 @import "../abstracts/variables";
 @import "../abstracts/mixins";
 
+.reduced-motion-mode * {
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    transition: none !important;
+}
+
 body {
     @include font('15px', 'Gilroy-Medium');
     background-color: var(--bg);

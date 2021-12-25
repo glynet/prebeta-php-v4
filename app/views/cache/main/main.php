@@ -59,7 +59,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="flash"><rect width="24" height="24" opacity="0"/><path d="M11.11 23a1 1 0 0 1-.34-.06 1 1 0 0 1-.65-1.05l.77-7.09H5a1 1 0 0 1-.83-1.56l7.89-11.8a1 1 0 0 1 1.17-.38 1 1 0 0 1 .65 1l-.77 7.14H19a1 1 0 0 1 .83 1.56l-7.89 11.8a1 1 0 0 1-.83.44z"/></g></g></svg>
                 </div>
             </div>
-            <div @click="ui.desktop.left.select('settings')" class="menu-item menu-settings">
+            <div @click="ui.desktop.left.select('settings', false); app.settings(1)" class="menu-item menu-settings">
                 <div class="item">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="settings-2"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><circle cx="12" cy="12" r="1.5"/><path d="M20.32 9.37h-1.09c-.14 0-.24-.11-.3-.26a.34.34 0 0 1 0-.37l.81-.74a1.63 1.63 0 0 0 .5-1.18 1.67 1.67 0 0 0-.5-1.19L18.4 4.26a1.67 1.67 0 0 0-2.37 0l-.77.74a.38.38 0 0 1-.41 0 .34.34 0 0 1-.22-.29V3.68A1.68 1.68 0 0 0 13 2h-1.94a1.69 1.69 0 0 0-1.69 1.68v1.09c0 .14-.11.24-.26.3a.34.34 0 0 1-.37 0L8 4.26a1.72 1.72 0 0 0-1.19-.5 1.65 1.65 0 0 0-1.18.5L4.26 5.6a1.67 1.67 0 0 0 0 2.4l.74.74a.38.38 0 0 1 0 .41.34.34 0 0 1-.29.22H3.68A1.68 1.68 0 0 0 2 11.05v1.89a1.69 1.69 0 0 0 1.68 1.69h1.09c.14 0 .24.11.3.26a.34.34 0 0 1 0 .37l-.81.74a1.72 1.72 0 0 0-.5 1.19 1.66 1.66 0 0 0 .5 1.19l1.34 1.36a1.67 1.67 0 0 0 2.37 0l.77-.74a.38.38 0 0 1 .41 0 .34.34 0 0 1 .22.29v1.09A1.68 1.68 0 0 0 11.05 22h1.89a1.69 1.69 0 0 0 1.69-1.68v-1.09c0-.14.11-.24.26-.3a.34.34 0 0 1 .37 0l.76.77a1.72 1.72 0 0 0 1.19.5 1.65 1.65 0 0 0 1.18-.5l1.34-1.34a1.67 1.67 0 0 0 0-2.37l-.73-.73a.34.34 0 0 1 0-.37.34.34 0 0 1 .29-.22h1.09A1.68 1.68 0 0 0 22 13v-1.94a1.69 1.69 0 0 0-1.68-1.69zM12 15.5a3.5 3.5 0 1 1 3.5-3.5 3.5 3.5 0 0 1-3.5 3.5z"/></g></g></svg>
                 </div>
@@ -92,7 +92,9 @@
                     </div>
                     <div class="search">
                         <div class="area">
-                            <input class="search-input" type="search" placeholder="Bir şeyler arayın" id="">
+                            <label>
+                                <input class="search-input" type="search" placeholder="Bir şeyler arayın" id="">
+                            </label>
                         </div>
                         <div class="icon">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" opacity="0"></rect><path d="M20.71 19.29l-3.4-3.39A7.92 7.92 0 0 0 19 11a8 8 0 1 0-8 8 7.92 7.92 0 0 0 4.9-1.69l3.39 3.4a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42zM5 11a6 6 0 1 1 6 6 6 6 0 0 1-6-6z"></path></svg>
@@ -125,7 +127,7 @@
                         <div class="themes-content">
                             <div class="title">Görünüm</div>
                             <div class="content">
-                                <div @click="app.setTheme(1);" class="section theme-section-dropdown-button theme-section-light-mode" selected>
+                                <div @click="client.setTheme(1);" class="section theme-section-dropdown-button theme-section-light-mode" selected>
                                     <div class="icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="sun"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><path d="M12 6a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v2a1 1 0 0 0 1 1z"/><path d="M21 11h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2z"/><path d="M6 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1z"/><path d="M6.22 5a1 1 0 0 0-1.39 1.47l1.44 1.39a1 1 0 0 0 .73.28 1 1 0 0 0 .72-.31 1 1 0 0 0 0-1.41z"/><path d="M17 8.14a1 1 0 0 0 .69-.28l1.44-1.39A1 1 0 0 0 17.78 5l-1.44 1.42a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.31z"/><path d="M12 18a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/><path d="M17.73 16.14a1 1 0 0 0-1.39 1.44L17.78 19a1 1 0 0 0 .69.28 1 1 0 0 0 .72-.3 1 1 0 0 0 0-1.42z"/><path d="M6.27 16.14l-1.44 1.39a1 1 0 0 0 0 1.42 1 1 0 0 0 .72.3 1 1 0 0 0 .67-.25l1.44-1.39a1 1 0 0 0-1.39-1.44z"/><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4z"/></g></g></svg>
                                     </div>
@@ -133,7 +135,7 @@
                                         <span>Aydınlık</span>
                                     </div>
                                 </div>
-                                <div @click="app.setTheme(2);" class="section theme-section-dropdown-button theme-section-dark-mode">
+                                <div @click="client.setTheme(2);" class="section theme-section-dropdown-button theme-section-dark-mode">
                                     <div class="icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="moon"><rect width="24" height="24" opacity="0"/><path d="M12.3 22h-.1a10.31 10.31 0 0 1-7.34-3.15 10.46 10.46 0 0 1-.26-14 10.13 10.13 0 0 1 4-2.74 1 1 0 0 1 1.06.22 1 1 0 0 1 .24 1 8.4 8.4 0 0 0 1.94 8.81 8.47 8.47 0 0 0 8.83 1.94 1 1 0 0 1 1.27 1.29A10.16 10.16 0 0 1 19.6 19a10.28 10.28 0 0 1-7.3 3z"/></g></g></svg>
                                     </div>
@@ -141,7 +143,7 @@
                                         <span>Karanlık</span>
                                     </div>
                                 </div>
-                                <div @click="app.setTheme(3);" class="section theme-section-dropdown-button theme-section-system-mode">
+                                <div @click="client.setTheme(3);" class="section theme-section-dropdown-button theme-section-system-mode">
                                     <div class="icon">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g data-name="Layer 2"><g data-name="settings-2"><rect width="24" height="24" transform="rotate(180 12 12)" opacity="0"/><circle cx="12" cy="12" r="1.5"/><path d="M20.32 9.37h-1.09c-.14 0-.24-.11-.3-.26a.34.34 0 0 1 0-.37l.81-.74a1.63 1.63 0 0 0 .5-1.18 1.67 1.67 0 0 0-.5-1.19L18.4 4.26a1.67 1.67 0 0 0-2.37 0l-.77.74a.38.38 0 0 1-.41 0 .34.34 0 0 1-.22-.29V3.68A1.68 1.68 0 0 0 13 2h-1.94a1.69 1.69 0 0 0-1.69 1.68v1.09c0 .14-.11.24-.26.3a.34.34 0 0 1-.37 0L8 4.26a1.72 1.72 0 0 0-1.19-.5 1.65 1.65 0 0 0-1.18.5L4.26 5.6a1.67 1.67 0 0 0 0 2.4l.74.74a.38.38 0 0 1 0 .41.34.34 0 0 1-.29.22H3.68A1.68 1.68 0 0 0 2 11.05v1.89a1.69 1.69 0 0 0 1.68 1.69h1.09c.14 0 .24.11.3.26a.34.34 0 0 1 0 .37l-.81.74a1.72 1.72 0 0 0-.5 1.19 1.66 1.66 0 0 0 .5 1.19l1.34 1.36a1.67 1.67 0 0 0 2.37 0l.77-.74a.38.38 0 0 1 .41 0 .34.34 0 0 1 .22.29v1.09A1.68 1.68 0 0 0 11.05 22h1.89a1.69 1.69 0 0 0 1.69-1.68v-1.09c0-.14.11-.24.26-.3a.34.34 0 0 1 .37 0l.76.77a1.72 1.72 0 0 0 1.19.5 1.65 1.65 0 0 0 1.18-.5l1.34-1.34a1.67 1.67 0 0 0 0-2.37l-.73-.73a.34.34 0 0 1 0-.37.34.34 0 0 1 .29-.22h1.09A1.68 1.68 0 0 0 22 13v-1.94a1.69 1.69 0 0 0-1.68-1.69zM12 15.5a3.5 3.5 0 1 1 3.5-3.5 3.5 3.5 0 0 1-3.5 3.5z"/></g></g></svg>
                                     </div>
@@ -196,7 +198,7 @@
                     <div class="user">
                         <div class="details">
                             <div @click="app.open('myprofile');" class="profile-picture pp-content">
-                                <img src="img/avatar.png">
+                                <img src="img/avatar.png" alt="">
                             </div>
                         </div>
                     </div>
@@ -271,7 +273,7 @@
                         <?php foreach($recommended_contacts as $rc): ?>
                         <div @click="app.open('profile', { username: '<?=$rc['username']?>', user_id: <?=$rc['id']?> })" class="contact contact-user-<?=$rc['id']?>">
                             <div class="avatar">
-                                <img src="<?=$rc['avatar']?>">
+                                <img src="<?=$rc['avatar']?>" alt="">
                             </div>
                             <div class="details">
                                 <div class="name">
@@ -305,9 +307,67 @@
     </div>
 
     <modal-area>
+        <div id="settings" class="modal">
+            <div class="modal-content" auto>
+                <div class="template-7">
+                    <div class="settings-menu">
+                        <div class="menu-group">
+                            <div class="group-title">
+                                <span>Kullanıcı</span>
+                            </div>
+                            <div @click="app.settings(1)" class="group-item group-item-1" selected>
+                                <span>Hesabım</span>
+                            </div>
+                            <div @click="app.settings(2)" class="group-item group-item-2">
+                                <span>Profili Düzenle</span>
+                            </div>
+                            <div @click="app.settings(3)" class="group-item group-item-3">
+                                <span>Gizlilik & Güvenlik</span>
+                            </div>
+                        </div>
+                        <div class="menu-group">
+                            <div class="group-title">
+                                <span>Premium</span>
+                            </div>
+                            <div @click="app.settings(4)" class="group-item group-item-4">
+                                <span>Glynet Premium</span>
+                            </div>
+                        </div>
+                        <div class="menu-group">
+                            <div class="group-title">
+                                <span>Uygulama</span>
+                            </div>
+                            <div @click="app.settings(5)" class="group-item group-item-5">
+                                <span>Görünüm</span>
+                            </div>
+                            <div @click="app.settings(6)" class="group-item group-item-6">
+                                <span>Bölge ve Dil</span>
+                            </div>
+                            <div @click="app.settings(7)" class="group-item group-item-7">
+                                <span>Bildirimler</span>
+                            </div>
+                            <div @click="app.settings(8)" class="group-item group-item-8">
+                                <span>Erişilebilirlik</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-content">
+                        <div class="title-bar"></div>
+                        <div class="settings-dynamic"></div>
+                    </div>
+                    <div class="save-changes-container">
+                        <div @click="client.updateSettings(settingsTab)" class="save-changes-button save-btn">
+                            <span>Değişiklikleri Kaydet</span>
+                        </div>
+                        <div @click="ui.desktop.settings.changesControl(true)" class="save-changes-button discard-btn">
+                            <span>Geri Al</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="profile-picture" class="modal"></div>
-
-        <div class="modal" id="post-likes">
+        <div id="post-likes" class="modal">
             <div class="modal-content" fill>
                 <div class="template-5">
                     <div class="title">Gönderiyi beğenenler</div>
