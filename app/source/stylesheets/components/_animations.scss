@@ -129,3 +129,23 @@
     50% { left: 0%; top: 0%; }
     100% { left: -200%; top: -200%; }
 }
+
+@include keyframes(bookmarks-little-star) {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(180deg);
+    }
+}
+
+@include keyframes(bookmarks-little-star-container) {
+    from {
+        opacity: 1;
+        top: -10px;
+    }
+    to {
+        opacity: 0;
+        top: 5px;
+    }
+}

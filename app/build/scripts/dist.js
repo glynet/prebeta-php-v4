@@ -683,6 +683,9 @@ var Glynet;
                             posts.collect('explore');
                             ui.desktop.categories.get();
                             break;
+                        case 'bookmarks':
+                            posts.collect('bookmarks');
+                            break;
                         case 'feed':
                         default:
                             posts.collect('feed');
@@ -700,7 +703,7 @@ var Glynet;
                 window.open(`mommycanigoout/?r=${btoa(url)}`, '_blank');
             }
             else {
-                this.confirm('Yönlendirme', 'Gitmek üzere olduğunuz internet sitesinin Glynet ile uzaktan veya yakından bağlantısı bulunmamaktadır. Oluşabilecek herhangi bir güvenlik ihmaline karşın dikkatli olmanızı öneririz.', ['Anladım', 'Geri dön'], "app.openExternal('" + url + "', true)");
+                this.confirm('Yönlendirme', 'Gitmek üzere olduğunuz internet sitesinin Glynet ile uzaktan veya yakından bağlantısı bulunmamaktadır. Oluşabilecek herhangi bir güvenlik ihmaline karşın dikkatli olmanızı öneririz.', ['Anladım', 'Geri dön'], `app.openExternal('${url}'}', true)`);
             }
         }
         router(url) {
@@ -1661,10 +1664,8 @@ document.addEventListener("DOMContentLoaded", function () {
     client.setTheme(doc.cookies.get('theme') == undefined ? 1 : parseInt(doc.cookies.get('theme')), false);
     app.scrollToTop();
     app.clickListener();
-    ui.changeFontSize(parseInt(doc.cookies.get('rwRfs')));
-    ui.changeLineHeight(parseInt(doc.cookies.get('rwRlh')));
-    app.settings(2);
-    setTimeout(() => app.settings(2), 300);
+    ui.changeFontSize(doc.cookies.get('rwRfs') ? parseInt(doc.cookies.get('rwRfs')) : 9);
+    ui.changeLineHeight(doc.cookies.get('rwRlh') ? parseInt(doc.cookies.get('rwRlh')) : 7);
     window.onpopstate = () => app.router(window.location.pathname.replace("/glynet.com/", ""));
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('search-input'))

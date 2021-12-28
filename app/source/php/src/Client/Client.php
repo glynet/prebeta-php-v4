@@ -4,10 +4,10 @@ use Glynet\Database\Database as db;
 use JetBrains\PhpStorm\ArrayShape;
 
 class Client {
-    public static string $token;
+    public static string|null $token;
     public static object $data;
 
-    public static function setToken(string $token): string
+    public static function setToken(string|null $token): string|null
     {
         return self::$token = $token;
     }
@@ -74,11 +74,12 @@ class Client {
 
         foreach (db::fetchAll($get) as $item) {
             $icon = match (explode(' ', $item->os)[0]) {
-                'Mac' => 'static/assets/images/os/apple.png',
+                'Mac', 'iPhone' => 'static/assets/images/os/apple.png',
                 'Windows' => 'static/assets/images/os/windows.png',
                 'Android' => 'static/assets/images/os/android.png',
                 'Chrome' => 'static/assets/images/os/chrome.png',
                 'Linux' => 'static/assets/images/os/linux.png',
+                'Ubuntu' => 'static/assets/images/os/ubuntu.png',
                 default => 'static/assets/images/os/unknown.png'
             };
 

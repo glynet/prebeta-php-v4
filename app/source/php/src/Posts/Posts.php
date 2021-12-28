@@ -403,4 +403,12 @@ class Posts {
             'post' => $post_id
         ]);
     }
+
+    public static function getBookmarkedPostsDetails(int $token): int
+    {
+        $user = db::fetch(db::select("users", "token='$token'"));
+        $post_count = db::select("bookmarks", "user='$user->id'");
+
+        return db::getCount($post_count);
+    }
 }

@@ -398,12 +398,16 @@ namespace Glynet
                         case 'profile':
                             posts.collect('profile', $('.profile-container').id.replace('c', ''));
                             break;
-    
+
                         case 'explore':
                             posts.collect('explore');
                             ui.desktop.categories.get();
                             break;
-    
+
+                        case 'bookmarks':
+                            posts.collect('bookmarks');
+                            break;
+
                         case 'feed':
                         default:
                             posts.collect('feed');
@@ -427,7 +431,7 @@ namespace Glynet
                     'Yönlendirme',
                     'Gitmek üzere olduğunuz internet sitesinin Glynet ile uzaktan veya yakından bağlantısı bulunmamaktadır. Oluşabilecek herhangi bir güvenlik ihmaline karşın dikkatli olmanızı öneririz.',
                     ['Anladım', 'Geri dön'],
-                    "app.openExternal('" + url + "', true)"
+                    `app.openExternal('${url}'}', true)`
                 );
             }
         }

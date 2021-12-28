@@ -15,11 +15,8 @@ document.addEventListener("DOMContentLoaded", function() {
     app.scrollToTop();
     app.clickListener();
 
-    ui.changeFontSize(parseInt(doc.cookies.get('rwRfs')));
-    ui.changeLineHeight(parseInt(doc.cookies.get('rwRlh')));
-
-    app.settings(2);
-    setTimeout(() => app.settings(2), 300)
+    ui.changeFontSize(doc.cookies.get('rwRfs') ? parseInt(doc.cookies.get('rwRfs')) : 9);
+    ui.changeLineHeight(doc.cookies.get('rwRlh') ? parseInt(doc.cookies.get('rwRlh')) : 7);
 
     window.onpopstate = () =>
         app.router(window.location.pathname.replace("/glynet.com/", ""));

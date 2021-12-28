@@ -1,0 +1,62 @@
+@use "sass:math";
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+.bookmarks-container {
+    .bookmarks-top {
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        margin-top: 25px;
+        color: var(--grey);
+
+        .top-icons {
+            display: flex;
+            align-items: flex-end;
+
+            .little {
+                position: relative;
+                @include animation('bookmarks-little-star-container 2s infinite');
+
+                svg {
+                    height: 23px;
+                    fill: var(--grey);
+                    @include animation('bookmarks-little-star 2s infinite');
+                }
+            }
+
+            .big {
+                svg {
+                    height: 40px;
+                    fill: var(--grey);
+                }
+            }
+        }
+
+        .top-title {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            margin-top: 10px;
+
+            span {
+                &:nth-child(1) {
+                    @include font('26px', 'Gilroy-Bold');
+                }
+
+                &:nth-child(2) {
+                    margin-top: 3px;
+                    @include font('19px', 'Gilroy-Medium');
+                }
+            }
+        }
+    }
+
+    .bookmarks-content {
+        margin-top: 25px;
+    }
+}

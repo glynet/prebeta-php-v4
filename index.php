@@ -17,9 +17,9 @@ use \Glynet\UserService\User as user,
     \Glynet\ClientService\ClientUpdate,
     \Glynet\ClientService\Notifications as notifications;
 
-$token_list = ["245868998", "262923799", "245868931", "2458689931", "483588160", "483588189", "591554326"];
+$token_list = ["245868998", "262923799", "5362721370146281", "2458689931", "483588160", "483588189", "591554326"];
 $token = $_COOKIE['token'];
-$token = $token_list[4];
+$token = $token_list[2];
 
 db::connect($GLOBALS['db']);
 client::setToken($token);
@@ -67,6 +67,9 @@ app::listen('/pages/:name', function(string $name) {
     viewer::render($name, match ($name) {
         'profile' => [
             'profile' => user::getData($_GET['username'], $GLOBALS['token'])
+        ],
+        'bookmarks' => [
+            'post_count' => posts::getBookmarkedPostsDetails($GLOBALS['token'])
         ],
         'settings' => [
             'user' => [ 'email' => $GLOBALS['user']->{'email'}, 'number' => $GLOBALS['user']->{'phone'} ],
